@@ -1073,17 +1073,24 @@ document.getElementById('btn-also-b').addEventListener('click', () => {
 // メールを開く（共通関数）
 // ══════════════════════════════════════════════
 function openMail(to, subject, body) {
-  const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+  const ua = navigator.userAgent;
+  const isIOS     = /iPhone|iPad|iPod/.test(ua);
+  const isAndroid = /Android/.test(ua);
+
   if (isIOS) {
-    // iOSはGmailアプリ→署名はアプリが自動挿入するので追加しない
+    // iOSはGmailアプリのURLスキーム（署名はアプリが自動挿入）
     const gmailUrl = `googlegmail://co?to=${encodeURIComponent(to)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     const fallbackTimer = setTimeout(() => {
       window.open(`https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
     }, 1500);
     window.location.href = gmailUrl;
     window.addEventListener('blur', () => clearTimeout(fallbackTimer), { once: true });
+  } else if (isAndroid) {
+    // AndroidはGmail WebをURLで開く（Gmailアプリが処理する）
+    const bodyWithSig = body + '\n\n' + SIGNATURE;
+    window.open(`https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyWithSig)}`, '_blank');
   } else {
-    // Mac/PCはGmail Web→URLで本文を渡すと署名が消えるので末尾に追加
+    // Mac/PCはGmail Web＋署名追加
     const bodyWithSig = body + '\n\n' + SIGNATURE;
     window.open(`https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyWithSig)}`, '_blank');
   }
