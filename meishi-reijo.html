@@ -466,7 +466,8 @@
           <div class="card-field full"><span class="field-label">部署</span><input class="field-value" id="f-dept" type="text" placeholder="部署名" /></div>
           <div class="card-field full"><span class="field-label">役職</span><input class="field-value" id="f-title" type="text" placeholder="役職" /></div>
           <div class="card-field full"><span class="field-label">メール</span><input class="field-value" id="f-email" type="email" placeholder="メールアドレス" /></div>
-          <div class="card-field full"><span class="field-label">電話</span><input class="field-value" id="f-tel" type="text" placeholder="電話番号" /></div>
+          <div class="card-field full"><span class="field-label">電話</span><input class="field-value" id="f-tel" type="text" placeholder="固定電話番号" /></div>
+          <div class="card-field full"><span class="field-label">携帯電話</span><input class="field-value" id="f-mobile" type="text" placeholder="090・080・070等" /></div>
           <div class="card-field full"><span class="field-label">住所</span><input class="field-value" id="f-address" type="text" placeholder="住所" /></div>
         </div>
       </div>
@@ -811,7 +812,8 @@ ${memo.content || '（なし）'}
   ただし会社名・部署・役職がすべて空欄の場合は「${p.name}様」のみ
 - 次の行に「お世話になっております。ライターの栗原です。」
 - その次の行：「本日は取材にご対応くださり、ありがとうございました。」（この一文のみ。それ以上のお礼の言葉は不要）
-- 次に、取材した内容（媒体名・取材テーマ）を箇条書きで簡潔に列記する
+- 次に、以下の取材内容メモをもとに「礼状に盛り込むべき内容」を箇条書きで2〜4点列記する（メモをそのまま転記するのではなく、取材直後の礼状として自然な形に整理する）
+- 取材テーマ・媒体名は必ず含める。メモに具体的なエピソードや印象的な話題があれば1点加える
 ${isMedia
   ? '- その後、今後の進行についてシンプルに一言添える（「引き続きよろしくお願いいたします」程度）'
   : '- その後、「もし追加で質問等が生じた場合は、メールでご連絡させていただきます。お忙しいところ恐れ入りますが、よろしくお願いいたします。記事ができあがりましたら、ご確認のためお送りいたします。引き続き、どうぞよろしくお願いいたします。」と続ける'}
@@ -841,7 +843,7 @@ ${isMedia
   ただし会社名・部署・役職がすべて空欄の場合は「${p.name}様」のみ
 - 次の行に「お世話になっております。本日${memo.place || ''}でご挨拶させていただきました、ライターの栗原です。」
 - ご挨拶できたことへの感謝を一文で簡潔に述べる（場所・イベント名は書き出しに含めたので本文では繰り返さない）
-- 相手の仕事・専門分野に一言触れる（メモに情報がある場合のみ。なければ省略）
+- 取材内容メモをもとに、相手の仕事・専門分野や会話の内容に自然に触れる（メモがない場合は省略）。「さりげなく好印象を残す」観点で、押しつけがましくなく自然に盛り込む
 - 今後またお目にかかれることへの期待を添える
 - 署名は不要
 - 全体で120〜160字程度の極めてシンプルな文面
@@ -875,6 +877,7 @@ ${isMedia
 - 次の行に「お世話になっております。ライターの栗原です。」
 - 先日の取材が掲載された媒体が刊行されたことへの報告と感謝を簡潔に
 - 媒体名・号数などの情報を明記する
+- 取材内容メモをもとに、刊行後の礼状として自然な一言（取材テーマへの言及など）を1点加える（「〜についてお話いただいた内容が記事になりました」程度のシンプルな表現で）
 ${isMedia
   ? '- 編集者・出版社向けの場合は、制作へのお礼と今後の協力への意欲をシンプルに。「掲載誌をお送りします」などの記述は一切不要'
   : '- 取材対象者・広報向けの場合は、取材協力へのお礼のみ。「掲載誌をお送りします」などの記述は一切不要'}
@@ -939,11 +942,13 @@ btnRead.addEventListener('click', async () => {
   "dept": "部署名",
   "title": "役職",
   "email": "メールアドレス",
-  "tel": "電話番号",
+  "tel": "電話番号（03・06等の固定電話または自宅電話。FAX番号は除く）",
+  "mobile": "携帯電話番号（090・080・070等で始まる番号のみ）",
   "address": "住所"
 }
 読み取れない項目は空文字にしてください。
-ふりがなは名刺に明記されている場合のみ記入し、記載がない場合は必ず空文字にしてください。漢字からの推測は行わないでください。` }
+ふりがなは名刺に明記されている場合のみ記入し、記載がない場合は必ず空文字にしてください。漢字からの推測は行わないでください。
+FAX番号はtelにもmobileにも入れないでください。` }
       ]
     }];
     const text = await callClaude(messages);
@@ -956,6 +961,7 @@ btnRead.addEventListener('click', async () => {
     document.getElementById('f-title').value = parsed.title || '';
     document.getElementById('f-email').value = parsed.email || '';
     document.getElementById('f-tel').value = parsed.tel || '';
+    document.getElementById('f-mobile').value = parsed.mobile || '';
     document.getElementById('f-address').value = parsed.address || '';
     document.getElementById('m-date').value = new Date().toISOString().split('T')[0];
     // 確認画面にも名刺画像を表示
@@ -975,6 +981,7 @@ document.getElementById('btn-to-memo').addEventListener('click', () => {
   state.parsed.title = document.getElementById('f-title').value;
   state.parsed.email = document.getElementById('f-email').value;
   state.parsed.tel = document.getElementById('f-tel').value;
+  state.parsed.mobile = document.getElementById('f-mobile').value;
   state.parsed.address = document.getElementById('f-address').value;
   setStep(3); showSection('sec-memo');
 });
@@ -1136,6 +1143,7 @@ function buildSheetPayload(record) {
     title: record.person?.title || '',
     email: record.person?.email || '',
     tel: record.person?.tel || '',
+    mobile: record.person?.mobile || '',
     address: record.person?.address || '',
     date: record.memo?.date || '',
     place: record.memo?.place || '',
